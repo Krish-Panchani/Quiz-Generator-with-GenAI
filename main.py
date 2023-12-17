@@ -1,10 +1,16 @@
 from flask import Flask
 from flask import request
-from flask import Response                                
+from flask import Response                                #<-CHANGED
 import os
+import vertexai                                           #<-CHANGED
+from vertexai.language_models import TextGenerationModel  #<-CHANGED
 
-import vertexai                                           
-from vertexai.language_models import TextGenerationModel  
+# Default model settings
+MODEL = "text-bison"
+MAX_TOKENS = 1024
+TEMPERATURE = 0.5
+TOP_P = 0.5
+TOP_K = 40
 
 # Default quiz settings
 TOPIC = "History"
@@ -30,15 +36,15 @@ if not PORT:
     PORT = 8080
 
 # Initialize Vertex AI access.
-vertexai.init(project="YOUR_PROJECT", location="us-central1")  
-parameters = {                                                 
-    "candidate_count": 1,                                      
-    "max_output_tokens": 1024,                                 
-    "temperature": 0.5,                                        
-    "top_p": 0.8,                                              
-    "top_k": 40,                                               
-}                                                              
-model = TextGenerationModel.from_pretrained(MODEL)             
+vertexai.init(project="code-vipassana-404706", location="us-central1")  #<-CHANGED
+parameters = {                                                 #<-CHANGED
+    "candidate_count": 1,                                      #<-CHANGED
+    "max_output_tokens": 1024,                                 #<-CHANGED
+    "temperature": 0.5,                                        #<-CHANGED
+    "top_p": 0.8,                                              #<-CHANGED
+    "top_k": 40,                                               #<-CHANGED
+}                                                              #<-CHANGED
+model = TextGenerationModel.from_pretrained(MODEL)             #<-CHANGED
 
 # This function takes a dictionary, a name, and a default value.
 # If the name exists as a key in the dictionary, the corresponding
@@ -58,11 +64,12 @@ def generate():
     topic = check(args, "topic", TOPIC)
     num_q = check(args, "num_q", NUM_Q)
     diff = check(args, "diff", DIFF)
-    prompt = PROMPT.format(topic=topic, num_q=num_q, diff=diff)
-    response = model.predict(prompt, **parameters)      
-    print(f"Response from Model: {response.text}")      
-    html = f"{response.text}"                           
-    return Response(html, mimetype="application/json")  
+    lang = check(args, "lang", LANG)
+    prompt = PROMPT.format(topic=topic, num_q=num_q, diff=diff, lang=lang)
+    response = model.predict(prompt, **parameters)      #<-CHANGED
+    print(f"Response from Model: {response.text}")      #<-CHANGED
+    html = f"{response.text}"                           #<-CHANGED
+    return Response(html, mimetype="application/json")  #<-CHANGED
 
 # This code ensures that your Flask app is started and listens for
 # incoming connections on the local interface and port 8080.
